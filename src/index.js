@@ -15,7 +15,6 @@ try {
     mongoose.connect(process.env.VIREO_MONGO_URI);
     console.log('Connected to database')
     app.listen(process.env.VIREO_PORT, () => {
-    console.log(`Server online at http://localhost:${process.env.VIREO_PORT}`);
 });
 } catch (err) {
     console.error(err)

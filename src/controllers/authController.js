@@ -32,7 +32,7 @@ async function signup(req, res) {
         // User  connection information:
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
-        const geoRes = await axios.get(`http://ip-api.com/json/${ip}`);
+        const geoRes = await axios.get(`http://ip-api.com/json/${ip[0]}`);
         const location = `${geoRes.data.city}, ${geoRes.data.country}`
 
         // Save connection to newUser, such as IP, Device and Location (Connected devices)
@@ -71,6 +71,23 @@ async function login(req, res) {
         // Compares if the password is the same as the one in database
         const valid = await bcrypt.compare(passwordHash, user.passwordHash);
         if(!valid) return res.status(401).json({status: '401', type: 'Authentication', message: 'INCORRECT_PASSWORD'});
+
+                
+        // User  connection information:
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+        const geoRes = await axios.get(`http://ip-api.com/json/${ip[0]}`);
+        const location = `${geoRes.data.city}, ${geoRes.data.country}`
+
+        // Save connection to newUser, such as IP, Device and Location (Connected devices)
+        // IP: 123.45.678.91
+        // Device: Windows 10/11, Firefox/Chrome, etc
+        // Location: City, Country
+        user.connections.push({
+            ip,
+            device: userAgent,
+            location
+        });
 
         // Sign the access
         const token = jwt.sign({id: user._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
