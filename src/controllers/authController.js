@@ -91,6 +91,8 @@ async function login(req, res) {
             location
         });
 
+        user.save();
+
         // Sign the access
         const token = jwt.sign({id: user._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
 
