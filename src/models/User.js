@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: false},
   isVerified: {type: Boolean, default: false},
   isBanned: { type: Boolean, default: false },
-  preferedTheme: { type: String, enum: ['light', 'dark'], default: 'dark'},
+  preferedTheme: { type: String, enum: ['light', 'dark', 'amelia'], default: 'dark'},
   connections: [connectionSchema],
 });
 
