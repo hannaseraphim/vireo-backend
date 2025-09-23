@@ -28,7 +28,13 @@ async function signup(req, res) {
 
         // Sign the access
         const token = jwt.sign({id: newUser._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
-        
+        res.cookie('vireoAccessCookie', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        })
+
         // User  connection information:
         
         const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -44,12 +50,13 @@ async function signup(req, res) {
         newUser.connections.push({
             ip,
             device: userAgent,
-            location
+            location,
+            token
         });
 
         // Send info to database
         await newUser.save();
-        res.status(201).json({status: '201', type: 'Success', message: 'User created successfully.', token, user: {
+        res.status(201).json({status: '201', type: 'Success', message: 'User created successfully.', user: {
             id: newUser._id,
             accountName: newUser.accountName,
             nickName: newUser.nickName,
@@ -64,10 +71,10 @@ async function signup(req, res) {
 // Login
 async function login(req, res) {
     try {
-        const {email, passwordHash} = req.body;
+        const {emailOrUsername, passwordHash} = req.body;
 
         // Checks if the email exists in the database
-        const user = await User.findOne({email});
+        const user = await User.findOne({$or: [{email: emailOrUsername}, {accountName: emailOrUsername}]});
         if(!user) return res.status(404).json({status: '404', type: 'Not found', message: 'USER_NOT_FOUND'});
 
         // Compares if the password is the same as the one in database
@@ -90,9 +97,10 @@ async function login(req, res) {
         // Location: City, Country
         if(!alreadyConnected) {
             user.connections.push({
-            ip,
-            device: userAgent,
-            location
+                ip,
+                device: userAgent,
+                location,
+                token
         });
 
         await user.save();
@@ -100,8 +108,14 @@ async function login(req, res) {
 
         // Sign the access
         const token = jwt.sign({id: user._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
+        res.cookie('vireoAccessCookie', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        })
 
-        res.json({token, user});
+        res.json({user});
     } catch (err) {
         console.error(err)
         res.status(500).json({status: '500', type: 'Internal error', message: 'INTERNAL_ERROR'});

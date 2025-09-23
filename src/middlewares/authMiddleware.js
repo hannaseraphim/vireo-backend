@@ -2,20 +2,12 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers['authorization'];
-
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Token ausente' });
-  }
-
-  // Split "Bearer" and "TOKEN" and just gets the Token
-  const parts = authHeader.split(' ');
-  const token = parts.length === 2 ? parts[1] : authHeader;
+  const token = req.cookies.vireoAccessCookie;
 
   if (!token) {
-    return res.status(401).json({ error: 'Token ausente' });
+    return res.status(401).json({ error: 'Token is missing.' });
   }
-
+  
   try {
     const decoded = jwt.verify(token, process.env.VIREO_JWT_TOKEN);
     req.user = decoded;

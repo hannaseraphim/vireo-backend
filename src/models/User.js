@@ -4,6 +4,7 @@ const connectionSchema = new mongoose.Schema({
   ip: String,
   device: String,
   location: String,
+  token: String,
   timestamp: {type: Date, default: Date.now}
 })
 
@@ -18,6 +19,8 @@ const userSchema = new mongoose.Schema({
   isBanned: { type: Boolean, default: false },
   preferedTheme: { type: String, enum: ['light', 'dark', 'amelia'], default: 'dark'},
   connections: [connectionSchema],
+  revokedTokens: [],
+  friends: {type: Array}
 });
 
 module.exports = mongoose.model('User', userSchema);
