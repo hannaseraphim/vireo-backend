@@ -13,8 +13,8 @@ router.post('/logout', authMiddleware, async (req, res) => {
 
     res.clearCookie('vireoAccessCookie', {
         httpOnly: true,
-        secure: false,
-        sameSite: 'lax'
+        secure: true,
+        sameSite: 'None'
     });
 
     res.json({message: 'Logged out successfully'})
