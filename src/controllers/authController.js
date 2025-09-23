@@ -30,9 +30,11 @@ async function signup(req, res) {
         const token = jwt.sign({id: newUser._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
         
         // User  connection information:
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        
+        const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ip = typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : rawIp;
         const userAgent = req.headers['user-agent'];
-        const geoRes = await axios.get(`http://ip-api.com/json/${ip[0]}`);
+        const geoRes = await axios.get(`http://ip-api.com/json/${ip}`);
         const location = `${geoRes.data.city}, ${geoRes.data.country}`
 
         // Save connection to newUser, such as IP, Device and Location (Connected devices)
@@ -72,11 +74,11 @@ async function login(req, res) {
         const valid = await bcrypt.compare(passwordHash, user.passwordHash);
         if(!valid) return res.status(401).json({status: '401', type: 'Authentication', message: 'INCORRECT_PASSWORD'});
 
-                
         // User  connection information:
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ip = typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : rawIp;
         const userAgent = req.headers['user-agent'];
-        const geoRes = await axios.get(`http://ip-api.com/json/${ip[0]}`);
+        const geoRes = await axios.get(`http://ip-api.com/json/${ip}`);
         const location = `${geoRes.data.city}, ${geoRes.data.country}`
 
         // Save connection to newUser, such as IP, Device and Location (Connected devices)

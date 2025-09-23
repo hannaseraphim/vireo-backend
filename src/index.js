@@ -7,9 +7,12 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors({origin: 'https://vireo-kappa.vercel.app'}))
+app.use(cors({origin: `${process.env.VIREO_FRONT_END}`}))
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+app.get('/status', (req,res) => {
+    res.json({status: '200', type: 'Success', message: 'SERVER_ONLINE'})
+})
 
 try {   
     mongoose.connect(process.env.VIREO_MONGO_URI);
