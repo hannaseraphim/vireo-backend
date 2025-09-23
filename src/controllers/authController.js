@@ -81,17 +81,22 @@ async function login(req, res) {
         const geoRes = await axios.get(`http://ip-api.com/json/${ip}`);
         const location = `${geoRes.data.city}, ${geoRes.data.country}`
 
+        // Checks if the connecting device is not already saved on the database to avoid duplicance
+        const alreadyConnected = user.connections.some(conn => conn.ip === ip && conn.device === userAgent);
+
         // Save connection to newUser, such as IP, Device and Location (Connected devices)
         // IP: 123.45.678.91
         // Device: Windows 10/11, Firefox/Chrome, etc
         // Location: City, Country
-        user.connections.push({
+        if(!alreadyConnected) {
+            user.connections.push({
             ip,
             device: userAgent,
             location
         });
 
-        user.save();
+        await user.save();
+        }
 
         // Sign the access
         const token = jwt.sign({id: user._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
