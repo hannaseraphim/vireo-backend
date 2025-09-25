@@ -88,6 +88,15 @@ async function login(req, res) {
         const geoRes = await axios.get(`http://ip-api.com/json/${ip}`);
         const location = `${geoRes.data.city}, ${geoRes.data.country}`
 
+        // Sign the access
+        const token = jwt.sign({id: user._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
+        res.cookie('vireoAccessCookie', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        })
+
         // Checks if the connecting device is not already saved on the database to avoid duplicance
         const alreadyConnected = user.connections.some(conn => conn.ip === ip && conn.device === userAgent);
 
@@ -105,15 +114,6 @@ async function login(req, res) {
 
         await user.save();
         }
-
-        // Sign the access
-        const token = jwt.sign({id: user._id}, process.env.VIREO_JWT_TOKEN, {expiresIn: '30d'});
-        res.cookie('vireoAccessCookie', token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            maxAge: 30 * 24 * 60 * 60 * 1000
-        })
 
         res.json({user});
     } catch (err) {
