@@ -24,10 +24,10 @@ const friendsSchema = new mongoose.Schema({
 
 const accDetailsSchema = new mongoose.Schema({
   profilePictureUrl:  {type: String },
-  profilePictureType: {type: String },
+  profilePictureType: {type: String, default: 'png' },
   profileDescription: {type: String },
   profileBannerUrl:   {type: String },
-  profileBannerType:  {type: String },
+  profileBannerType:  {type: String, default: 'png' },
   profilePronouns:    {type: String },
   profileBadges:      [badgeSchema]
 })
@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
   preferedTheme: { type: String, enum: ['light', 'dark', 'amelia'], default: 'dark'},
   connections: [connectionSchema],
   revokedTokens: [],
-  friends: [friendsSchema],
+  friends: [friendsSchema]
 });
 
 module.exports = mongoose.model('User', userSchema);
